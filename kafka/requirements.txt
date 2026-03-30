@@ -1,0 +1,5 @@
+asyncio==4.0.0
+confluent-kafka==2.13.2
+dotenv==0.9.9
+python-dotenv==1.2.2
+websockets==16.0
