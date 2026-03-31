@@ -33,7 +33,7 @@ def process_message(msg):
         long = bus_position["longitude"]
         logger.info(f"Received message: Bus {bus_id} | Lat : {lat} | Long : {long} | Total messages received {total_received}")
     else:
-        logger.info(f"Received message: Removed item {bus_position["fahrtbezeichner"]}")
+        logger.info(f"Received message: Removed item {bus_position['fahrtbezeichner']}")
 
 
     total_received +=1
