@@ -1,0 +1,7 @@
+sources:
+  - name: raw_bus_positions
+    database: bus_radar_dev  
+    schema: bronze  
+    tables:
+      - name: raw_positions
+
