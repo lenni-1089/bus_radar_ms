@@ -2,3 +2,5 @@
 .env
 __pycache__/
 .DS_Store
+kafka/sample_data.md
+kafka/test_consumer.py
