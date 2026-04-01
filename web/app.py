@@ -7,6 +7,9 @@ Architecture:
   2. /stream endpoint: SSE generator snapshots the dict every ~1s,
      sends JSON to all connected browser clients.
   3. / endpoint: serves the Leaflet map HTML.
+
+Staleness: buses that haven't reported in >120 seconds are evicted from
+the dict before each SSE tick, so the map only shows currently active buses.
 """
 
 import json
@@ -14,6 +17,7 @@ import logging
 import os
 import threading
 import time
+
 from flask import Flask, Response, render_template
 from confluent_kafka import Consumer, KafkaError
 from dotenv import load_dotenv
@@ -41,6 +45,7 @@ kafka_config = {
 }
 
 TOPIC = "bus_locations_ms_raw"
+STALE_THRESHOLD_SECONDS = 600   # remove buses not seen for 10 minutes
 
 # ── Shared state ─────────────────────────────────────────────────────────────
 bus_positions = {}          # fahrtbezeichner → latest position dict
@@ -52,7 +57,7 @@ consumer_stats = {"total_received": 0, "total_removals": 0}
 def kafka_consumer_loop():
     """
     Runs in a daemon thread. Polls Kafka and maintains bus_positions dict.
-    MODIFY → upsert, REMOVE → delete.
+    MODIFY → upsert (with timestamp), REMOVE → delete.
     """
     consumer = Consumer(kafka_config)
     consumer.subscribe([TOPIC])
@@ -88,6 +93,7 @@ def kafka_consumer_loop():
                     bus_positions.pop(key, None)
                     consumer_stats["total_removals"] += 1
                 else:
+                    value["_last_seen"] = time.time()
                     bus_positions[key] = value
                 consumer_stats["total_received"] += 1
 
@@ -110,14 +116,25 @@ def index():
 @app.route("/stream")
 def stream():
     """
-    SSE endpoint. Every ~1s, yields the full bus_positions snapshot as JSON.
-    Each connected browser reads from this same shared dict — no duplicate
-    Kafka consumers.
+    SSE endpoint. Every ~1s, evicts stale buses and yields the remaining
+    bus_positions snapshot as JSON.
     """
     def generate():
         while True:
+            now = time.time()
             with bus_lock:
+                # Evict buses that haven't reported in STALE_THRESHOLD_SECONDS
+                stale_keys = [
+                    k for k, v in bus_positions.items()
+                    if now - v.get("_last_seen", 0) > STALE_THRESHOLD_SECONDS
+                ]
+                for k in stale_keys:
+                    del bus_positions[k]
+
                 snapshot = dict(bus_positions)
+
+            if stale_keys:
+                logger.info("Evicted %d stale buses", len(stale_keys))
 
             payload = json.dumps(snapshot)
             yield f"data: {payload}\n\n"
