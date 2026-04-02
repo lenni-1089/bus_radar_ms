@@ -762,7 +762,14 @@ function locateUser() {
       btn.disabled = false;
     },
     (err) => {
-      btn.textContent = '📍 Denied';
+      console.warn(`Geolocation Error [${err.code}]: ${err.message}`);
+      
+      let errorMsg = '📍 Error';
+      if (err.code === 1) errorMsg = '📍 Denied';      // User or browser blocked it
+      if (err.code === 2) errorMsg = '📍 Unavailable'; // Device can't find location
+      if (err.code === 3) errorMsg = '📍 Timeout';     // Took too long
+
+      btn.textContent = errorMsg;
       btn.disabled = false;
       setTimeout(() => { btn.textContent = '📍 Me'; }, 2500);
     },
