@@ -6,3 +6,4 @@ kafka/sample_data.md
 kafka/test_consumer.py
 logs/
 kafka/logs/
+kafka/.dbricks_secrets.md

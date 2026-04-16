@@ -30,7 +30,7 @@ The project serves as a hands-on learning path through the modern data stack. Ev
 The pipeline uses a streaming-first architecture with a shared Kafka backbone. Both branches consume independently from the same topic, but they serve fundamentally different purposes — the batch branch builds a durable analytical store (~220k rows/day, 2.6M+ rows accumulated), while the streaming branch powers a live operational dashboard. This is not a lambda architecture (where both branches compute the same result and a serving layer merges them), but rather two independent consumers each solving a different problem from the same event stream.
 
 <p align="center">
-  <img src="docs/busradar-ms-architecture.svg" alt="Busradar Pipeline Architecture" width="100%"/>
+  <img src="docs/busradar-ms-architecture.svg" alt="Busradar Pipeline Architecture" width="115%"/>
 </p>
 
 **Data flow:**
