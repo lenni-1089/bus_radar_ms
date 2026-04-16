@@ -1,0 +1,276 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* Busradar Design Tokens */
+:root {
+  --radius: 0.625rem;
+
+  /* Core palette */
+  --background: oklch(0.97 0.002 250);
+  --foreground: oklch(0.15 0.01 250);
+  --card: oklch(1 0 0 / 85%);
+  --card-foreground: oklch(0.15 0.01 250);
+  --popover: oklch(1 0 0 / 90%);
+  --popover-foreground: oklch(0.15 0.01 250);
+  --primary: oklch(0.55 0.18 250);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.96 0.005 250);
+  --secondary-foreground: oklch(0.25 0.02 250);
+  --muted: oklch(0.95 0.005 250);
+  --muted-foreground: oklch(0.55 0.02 250);
+  --accent: oklch(0.55 0.18 250);
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0.58 0.24 27);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0 0 0 / 8%);
+  --input: oklch(0 0 0 / 8%);
+  --ring: oklch(0.55 0.18 250);
+
+  --chart-1: oklch(0.55 0.18 250);
+  --chart-2: oklch(0.65 0.16 160);
+  --chart-3: oklch(0.6 0.2 30);
+  --chart-4: oklch(0.7 0.15 85);
+  --chart-5: oklch(0.55 0.2 310);
+
+  --sidebar: oklch(1 0 0 / 85%);
+  --sidebar-foreground: oklch(0.15 0.01 250);
+  --sidebar-primary: oklch(0.55 0.18 250);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.55 0.18 250 / 10%);
+  --sidebar-accent-foreground: oklch(0.55 0.18 250);
+  --sidebar-border: oklch(0 0 0 / 8%);
+  --sidebar-ring: oklch(0.55 0.18 250);
+
+  /* Busradar-specific tokens */
+  --br-panel: rgba(255, 255, 255, 0.85);
+  --br-panel-solid: #ffffff;
+  --br-text-primary: #1d1d1f;
+  --br-text-secondary: #6e6e73;
+  --br-text-tertiary: #a1a1a6;
+  --br-accent: #0071e3;
+  --br-accent-hover: #0077ed;
+  --br-live: #30d158;
+  --br-divider: rgba(0, 0, 0, 0.08);
+  --br-radius-pill: 999px;
+  --br-radius-panel: 18px;
+  --br-radius-card: 14px;
+  --br-radius-input: 10px;
+  --br-shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --br-shadow-control: 0 4px 16px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.06);
+  --br-shadow-marker: 0 2px 6px rgba(0, 0, 0, 0.15);
+  --br-transition-fast: 150ms ease-out;
+  --br-transition-base: 250ms ease-out;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+}
+
+/* Leaflet overrides */
+.leaflet-container {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+/* Bus marker */
+.bus-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  box-shadow: var(--br-shadow-marker);
+  font-family: 'Inter', sans-serif;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #fff;
+  padding: 1.5px 4px;
+  transition: transform var(--br-transition-fast), opacity var(--br-transition-base);
+  cursor: pointer;
+  white-space: nowrap;
+  min-width: 20px;
+  text-align: center;
+}
+
+.bus-marker:hover {
+  transform: scale(1.15);
+  z-index: 1000 !important;
+}
+
+.bus-marker.stale {
+  opacity: 0.4;
+  filter: grayscale(0.8);
+}
+
+.bus-marker.removing {
+  opacity: 0;
+  transition: opacity 500ms ease-out;
+}
+
+.bus-marker.flash {
+  animation: marker-flash 200ms ease-out;
+}
+
+@keyframes marker-flash {
+  0% { box-shadow: 0 0 0 0 rgba(0, 113, 227, 0.5); }
+  100% { box-shadow: var(--br-shadow-marker); }
+}
+
+/* Leaflet popup override */
+.leaflet-popup-content-wrapper {
+  border-radius: var(--br-radius-card) !important;
+  box-shadow: var(--br-shadow-panel) !important;
+  padding: 0 !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.leaflet-popup-content {
+  margin: 14px 16px !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+}
+
+.leaflet-popup-tip {
+  box-shadow: none !important;
+}
+
+.leaflet-popup-close-button {
+  display: none !important;
+}
+
+/* Live pulse */
+@keyframes live-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.live-dot {
+  animation: live-pulse 2s ease-in-out infinite;
+}
+
+/* Sidebar nav hover */
+.sidebar-nav-item {
+  transition: background var(--br-transition-fast);
+  border-radius: var(--br-radius-input);
+}
+
+.sidebar-nav-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.sidebar-nav-item.active {
+  background: rgba(0, 113, 227, 0.1);
+}
+
+/* Frosted glass */
+.frosted {
+  background: var(--br-panel);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 2px;
+}
+
+/* User location marker (Apple Maps style blue dot) */
+.user-location-marker {
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+
+.user-location-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #007aff;
+  border: 2.5px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+}
+
+.user-location-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(0, 122, 255, 0.15);
+  animation: location-pulse 2s ease-out infinite;
+  z-index: 1;
+}
+
+@keyframes location-pulse {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+  100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+}
