@@ -171,6 +171,31 @@
   100% { box-shadow: var(--br-shadow-marker); }
 }
 
+/* Focused (selected) bus — steady expanding ripple, like the user-location pin */
+.bus-marker.focused {
+  z-index: 1100 !important;
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+  position: relative;
+}
+
+.bus-marker.focused::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: rgba(0, 122, 255, 0.32);
+  animation: bus-focus-ripple 1.8s ease-out infinite;
+  z-index: -1;
+  pointer-events: none;
+}
+
+@keyframes bus-focus-ripple {
+  0%   { transform: scale(0.9); opacity: 0.75; }
+  80%  { opacity: 0.05; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
 /* Leaflet popup override */
 .leaflet-popup-content-wrapper {
   border-radius: var(--br-radius-card) !important;

@@ -27,6 +27,8 @@ function BusradarApp() {
   const [lastUpdateTime, setLastUpdateTime] = useState(Date.now());
   const [lastUpdateAgo, setLastUpdateAgo] = useState(0);
   const [updatedBusId, setUpdatedBusId] = useState<string | null>(null);
+  const [focusedBusId, setFocusedBusId] = useState<string | null>(null);
+  const focusedBusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [mapStyle, setMapStyle] = useState<"voyager" | "positron">("voyager");
   const [activeLines, setActiveLines] = useState<Set<string>>(new Set());
   const [selectedBuses, setSelectedBuses] = useState<Set<string>>(new Set());
@@ -66,18 +68,24 @@ function BusradarApp() {
     return cleanup;
   }, [handleEvent]);
 
+  // Refs to track which buses/lines we've already auto-added
+  const knownBusIds = useRef<Set<string>>(new Set());
+  const knownLines = useRef<Set<string>>(new Set());
+
   useEffect(() => {
     if (!allLinesInit && buses.size > 0) {
       const allLineSet = new Set(Array.from(buses.values()).map((b) => b.linie));
       setActiveLines(allLineSet);
       // Select all buses by default
       setSelectedBuses(new Set(Array.from(buses.keys())));
+      // Seed known sets so the new-item effect doesn't treat these as "new"
+      for (const id of buses.keys()) knownBusIds.current.add(id);
+      for (const line of allLineSet) knownLines.current.add(line);
       setAllLinesInit(true);
     }
   }, [buses, allLinesInit]);
 
-  // Only auto-add genuinely new buses (first appearance), not on every position update
-  const knownBusIds = useRef<Set<string>>(new Set());
+  // Auto-select genuinely new buses and lines on first appearance
   useEffect(() => {
     if (allLinesInit) {
       setSelectedBuses((prev) => {
@@ -87,6 +95,19 @@ function BusradarApp() {
           if (!knownBusIds.current.has(id)) {
             knownBusIds.current.add(id);
             next.add(id);
+            changed = true;
+          }
+        }
+        return changed ? next : prev;
+      });
+
+      setActiveLines((prev) => {
+        const next = new Set(prev);
+        let changed = false;
+        for (const bus of buses.values()) {
+          if (!knownLines.current.has(bus.linie)) {
+            knownLines.current.add(bus.linie);
+            next.add(bus.linie);
             changed = true;
           }
         }
@@ -156,6 +177,9 @@ function BusradarApp() {
 
   const handleFocusBus = (bus: BusState) => {
     mapInstanceRef.current?.flyTo([bus.latitude, bus.longitude], 16, { duration: 1.2 });
+    setFocusedBusId(bus.fahrtbezeichner);
+    if (focusedBusTimerRef.current) clearTimeout(focusedBusTimerRef.current);
+    focusedBusTimerRef.current = setTimeout(() => setFocusedBusId(null), 4000);
   };
 
   const handleLocateUser = () => {
@@ -175,6 +199,7 @@ function BusradarApp() {
       <BusMap
         buses={filteredBuses}
         updatedBusId={updatedBusId}
+        focusedBusId={focusedBusId}
         mapStyle={mapStyle}
         userLocation={userLocation}
         showTrails={showTrails}

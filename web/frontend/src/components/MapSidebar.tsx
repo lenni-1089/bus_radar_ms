@@ -59,11 +59,6 @@ export default function MapSidebar({
     ? `Updated ${lastUpdateAgo < 60 ? `${lastUpdateAgo}s ago` : `${Math.floor(lastUpdateAgo / 60)}m ago`}`
     : "Reconnecting...";
 
-  const formatAge = (bus: BusState) => {
-    const sec = Math.floor((Date.now() - bus.lastUpdate) / 1000);
-    return `+${sec}s`;
-  };
-
   if (collapsed) {
     return (
       <button
@@ -274,21 +269,40 @@ export default function MapSidebar({
                   <div style={{ fontSize: 11, fontWeight: 600, color: "var(--br-text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     {bus.richtung}
                   </div>
-                  <div style={{ fontSize: 9, color: "var(--br-text-tertiary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    {bus.fahrtbezeichner}
-                  </div>
+                  {(() => {
+                    const d = parseInt(bus.delay || "0", 10) || 0;
+                    if (d === 0) return null;
+                    const mins = Math.round(d / 60);
+                    const late = d > 0;
+                    return (
+                      <div style={{ fontSize: 9, fontWeight: 600, color: d < -600 ? "var(--br-text-tertiary)" : late ? "#c93400" : "#248a3d", whiteSpace: "nowrap" }}>
+                        {d < -600 ? "Not started yet" : late ? `+${mins} min late` : `${mins} min early`}
+                      </div>
+                    );
+                  })()}
                 </div>
-                <div style={{
-                  fontSize: 9,
-                  fontWeight: 600,
-                  color: bus.isStale ? "#c93400" : "var(--br-text-secondary)",
-                  background: bus.isStale ? "rgba(201,52,0,0.1)" : "rgba(0,0,0,0.05)",
-                  padding: "1px 6px",
-                  borderRadius: "var(--br-radius-pill)",
-                  flexShrink: 0,
-                }}>
-                  {formatAge(bus)}
-                </div>
+                {(() => {
+                  const sec = Math.floor((Date.now() - bus.lastUpdate) / 1000);
+                  if (sec <= 30) return null;
+                  const label = sec < 60 ? `${sec}s` : sec < 3600 ? `${Math.floor(sec / 60)}m` : `${Math.floor(sec / 3600)}h`;
+                  return (
+                    <div
+                      title={`Last position update was ${label} ago`}
+                      style={{
+                        fontSize: 9,
+                        fontWeight: 600,
+                        color: "var(--br-text-secondary)",
+                        background: "rgba(0,0,0,0.06)",
+                        padding: "2px 7px",
+                        borderRadius: "var(--br-radius-pill)",
+                        flexShrink: 0,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      no signal {label}
+                    </div>
+                  );
+                })()}
               </div>
             );
           })}

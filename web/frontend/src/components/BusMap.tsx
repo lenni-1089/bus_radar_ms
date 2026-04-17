@@ -12,15 +12,16 @@ const MAX_TRAIL_POINTS = 30;
 interface BusMapProps {
   buses: Map<string, BusState>;
   updatedBusId: string | null;
+  focusedBusId: string | null;
   mapStyle: "voyager" | "positron";
   userLocation: [number, number] | null;
   showTrails: boolean;
   onMapReady?: (map: L.Map) => void;
 }
 
-function createBusIcon(line: string, isStale: boolean, isFlash: boolean): L.DivIcon {
+function createBusIcon(line: string, isStale: boolean, isFlash: boolean, isFocused: boolean): L.DivIcon {
   const color = getLineColor(line);
-  const classes = ["bus-marker", isStale ? "stale" : "", isFlash ? "flash" : ""].filter(Boolean).join(" ");
+  const classes = ["bus-marker", isStale ? "stale" : "", isFlash ? "flash" : "", isFocused ? "focused" : ""].filter(Boolean).join(" ");
   return L.divIcon({
     className: "",
     html: `<div class="${classes}" style="background: ${color};">${line}</div>`,
@@ -39,11 +40,12 @@ function createUserLocationIcon(): L.DivIcon {
   });
 }
 
-export default function BusMap({ buses, updatedBusId, mapStyle, userLocation, showTrails, onMapReady }: BusMapProps) {
+export default function BusMap({ buses, updatedBusId, focusedBusId, mapStyle, userLocation, showTrails, onMapReady }: BusMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
+  const markerSigRef = useRef<Map<string, string>>(new Map());
   const userMarkerRef = useRef<L.Marker | null>(null);
   // Trail data: bus id -> array of [lat, lng] positions
   const trailDataRef = useRef<Map<string, L.LatLngTuple[]>>(new Map());
@@ -173,10 +175,12 @@ export default function BusMap({ buses, updatedBusId, mapStyle, userLocation, sh
           setTimeout(() => {
             map.removeLayer(marker);
             markersRef.current.delete(id);
+            markerSigRef.current.delete(id);
           }, 500);
         } else {
           map.removeLayer(marker);
           markersRef.current.delete(id);
+          markerSigRef.current.delete(id);
         }
         // Clean up trail data for removed buses
         trailDataRef.current.delete(id);
@@ -186,7 +190,8 @@ export default function BusMap({ buses, updatedBusId, mapStyle, userLocation, sh
     buses.forEach((bus, id) => {
       const pos: L.LatLngTuple = [bus.latitude, bus.longitude];
       const isFlash = id === updatedBusId;
-      const icon = createBusIcon(bus.linie, bus.isStale, isFlash);
+      const isFocused = id === focusedBusId;
+      const sig = `${bus.linie}|${bus.isStale}|${isFlash}|${isFocused}`;
       const existing = markersRef.current.get(id);
 
       // Track trail positions
@@ -213,8 +218,13 @@ export default function BusMap({ buses, updatedBusId, mapStyle, userLocation, sh
           }
           existing.setLatLng(pos);
         }
-        existing.setIcon(icon);
+        // Only recreate the icon when the visual appearance actually changed
+        if (sig !== markerSigRef.current.get(id)) {
+          existing.setIcon(createBusIcon(bus.linie, bus.isStale, isFlash, isFocused));
+          markerSigRef.current.set(id, sig);
+        }
       } else {
+        const icon = createBusIcon(bus.linie, bus.isStale, isFlash, isFocused);
         const marker = L.marker(pos, { icon })
           .addTo(map)
           .bindPopup(() => {
@@ -241,12 +251,13 @@ export default function BusMap({ buses, updatedBusId, mapStyle, userLocation, sh
         });
 
         markersRef.current.set(id, marker);
+        markerSigRef.current.set(id, sig);
       }
     });
 
     // Render trails after markers are synced
     renderTrails();
-  }, [buses, updatedBusId, showTrails, renderTrails]);
+  }, [buses, updatedBusId, focusedBusId, showTrails, renderTrails]);
 
   useEffect(() => {
     syncMarkers();

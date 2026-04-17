@@ -92,10 +92,19 @@ const MOCK_BUSES: Omit<BusEvent, "timestamp" | "event_type">[] = [
 ];
 
 export function createMockStream(onEvent: (event: BusEvent) => void): () => void {
+  // Assign a stable mock delay (in seconds) per bus, mostly small, some larger
+  const mockDelays = new Map<string, number>();
+  MOCK_BUSES.forEach((bus, i) => {
+    // mix of on-time, slightly late, very late, and a few early
+    const samples = [0, 0, 0, 60, 120, 180, 300, 420, 600, -60, -120];
+    mockDelays.set(bus.fahrtbezeichner, samples[i % samples.length]);
+  });
+
   // Send initial positions
   MOCK_BUSES.forEach((bus) => {
     onEvent({
       ...bus,
+      delay: String(mockDelays.get(bus.fahrtbezeichner) ?? 0),
       timestamp: new Date().toISOString(),
       event_type: "MODIFY",
     });
@@ -110,6 +119,7 @@ export function createMockStream(onEvent: (event: BusEvent) => void): () => void
 
     onEvent({
       ...bus,
+      delay: String(mockDelays.get(bus.fahrtbezeichner) ?? 0),
       timestamp: new Date().toISOString(),
       event_type: "MODIFY",
     });

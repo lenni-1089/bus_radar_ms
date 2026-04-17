@@ -385,33 +385,40 @@ export default function MobileBottomSheet({
                   >
                     {bus.richtung}
                   </div>
-                  <div
-                    style={{
-                      fontSize: 9,
-                      color: "var(--br-text-tertiary)",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {bus.fahrtbezeichner}
-                  </div>
+                  {(() => {
+                    const d = parseInt(bus.delay || "0", 10) || 0;
+                    if (d === 0) return null;
+                    const mins = Math.round(d / 60);
+                    const late = d > 0;
+                    return (
+                      <div style={{ fontSize: 9, fontWeight: 600, color: d < -600 ? "var(--br-text-tertiary)" : late ? "#c93400" : "#248a3d", whiteSpace: "nowrap" }}>
+                        {d < -600 ? "Not started yet" : late ? `+${mins} min late` : `${mins} min early`}
+                      </div>
+                    );
+                  })()}
                 </div>
-                {bus.delay && parseInt(bus.delay) > 0 && (
-                  <div
-                    style={{
-                      fontSize: 9,
-                      fontWeight: 600,
-                      color: "#c93400",
-                      background: "rgba(201,52,0,0.1)",
-                      padding: "1px 6px",
-                      borderRadius: "var(--br-radius-pill)",
-                      flexShrink: 0,
-                    }}
-                  >
-                    +{bus.delay}s
-                  </div>
-                )}
+                {(() => {
+                  const sec = Math.floor((Date.now() - bus.lastUpdate) / 1000);
+                  if (sec <= 30) return null;
+                  const label = sec < 60 ? `${sec}s` : sec < 3600 ? `${Math.floor(sec / 60)}m` : `${Math.floor(sec / 3600)}h`;
+                  return (
+                    <div
+                      title={`Last position update was ${label} ago`}
+                      style={{
+                        fontSize: 9,
+                        fontWeight: 600,
+                        color: "var(--br-text-secondary)",
+                        background: "rgba(0,0,0,0.06)",
+                        padding: "2px 7px",
+                        borderRadius: "var(--br-radius-pill)",
+                        flexShrink: 0,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      no signal {label}
+                    </div>
+                  );
+                })()}
               </div>
             );
           })}
